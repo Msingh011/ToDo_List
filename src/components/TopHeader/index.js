@@ -4,12 +4,12 @@ export default function TopHeader() {
   return (
     <>
       <div className="header">
-        <nav class="navbar navbar-light bg-light">
-          <div class="container-fluid">
-            <a class="navbar-brand">Hello</a>
-            <form class="d-flex">
+        <nav className="navbar navbar-light bg-light">
+          <div className="container-fluid">
+            <a className="navbar-brand">ToDO Dashboard</a>
+            <form className="d-flex">
               <input
-                class="form-control me-2"
+                className="form-control me-2"
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
