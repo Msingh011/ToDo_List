@@ -6,7 +6,7 @@ export default function TopHeader() {
       <div className="header">
         <nav className="navbar navbar-light bg-light">
           <div className="container-fluid">
-            <a className="navbar-brand">ToDO Dashboard</a>
+            <p className="m-0">ToDo Dashboard</p>
             <form className="d-flex">
               <input
                 className="form-control me-2"

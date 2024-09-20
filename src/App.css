@@ -73,6 +73,14 @@ html {
   font-size: 12px;
   letter-spacing: 0.5px;
 }
+.risk .med-btn{
+  background-color: #ffd146;
+  color: #000000;
+}
+.risk .low-btn{
+  background-color: #46fc35;
+  color: #000000;
+}
 .addbutton {
   border: 1px solid #ccc;
   border-radius: 7px;
@@ -90,6 +98,7 @@ html {
 .invalid {
   border-color: #ff0303 !important;
 }
+
 .card {
   width: fit-content;
   margin: 5px;
