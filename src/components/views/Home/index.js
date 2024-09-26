@@ -18,12 +18,13 @@ export default function Home() {
     taskDesc: "",
     taskDate: "",
     taskPriority: "",
+    taskMedia: [],
   });
+
+  console.log("MediaTask",taskFormState.taskMedia)
   const [taskError, setTaskError] = useState({});
 
-  console.log("sections", newSection);
-
-  //AddTask Const
+  //begin::Create New Section Code End
 
   const [formState, setFormState] = useState({
     sectionTitle: "",
@@ -51,49 +52,65 @@ export default function Home() {
     }
   };
 
-  //Create New Section Code End
+  console.log("sections", newSection);
+  //end::Create New Section Code End
 
-  const [addTask, setAddTask] = useState([]);
-
-  //Create New task Code Start
+  //begin::Handle for Create New Add Task End
 
   const handleTask = (e, sectionId) => {
     e.preventDefault();
+
     const allSections = [...newSection];
 
     allSections &&
-      allSections.map((item, index) => {
-        console.log(sectionId, " === ", item?.sectionId);
+      allSections.map((item) => {
         if (sectionId === item?.sectionId) {
-          const newTask = {
-            taskTitle: taskFormState?.taskTitle,
-            taskDesc: taskFormState?.taskDesc,
-            taskDate: taskFormState?.taskDate,
-            taskPriority: taskFormState?.taskPriority,
-            //taskMedia : [],
-          };
-          const updateTask = [...addTask, newTask];
-          setAddTask(updateTask);
-          item.tasks = updateTask;
-          setTaskFormState({
-            taskTitle: "",
-            taskDesc: "",
-            taskDate: "",
-            taskPriority: "",
-          });
-          localStorage.setItem("sections", JSON.stringify(allSections));
-          setNewSection(allSections);
-          console.log("addtask", newSection);
-          setTaskError({});
-        } else {
-          setTaskError({
-            taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
-            taskDesc: taskFormState?.taskDesc ? "" : "Description is Mandatory",
-            taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
-            taskPriority: taskFormState?.taskPriority
-              ? ""
-              : "Priority is Mandatory",
-          });
+          if (
+            // taskFormState?.taskTitle &&
+            // taskFormState?.taskDesc &&
+            // taskFormState?.taskDate &&
+            // taskFormState?.taskPriority &&
+            taskFormState?.taskMedia
+          ) {
+            // Add a unique task ID using Date.now()
+            const newTask = {
+              taskId: Date.now(), // Generate a unique ID for each task
+              // taskTitle: taskFormState?.taskTitle,
+              // taskDesc: taskFormState?.taskDesc,
+              // taskDate: taskFormState?.taskDate,
+              // taskPriority: taskFormState?.taskPriority,
+              taskMedia: taskFormState?.taskMedia,
+            };
+            const updateTask = [...(item.tasks || []), newTask]; // Get existing tasks for this section or an empty array
+            item.tasks = updateTask;
+            
+            localStorage.setItem("sections", JSON.stringify(allSections));
+            setNewSection(allSections);
+            setTaskError({});
+            setTaskFormState({
+              // taskTitle: "",
+              // taskDesc: "",
+              // taskDate: "",
+              // taskPriority: "",
+              taskMedia: [],
+            });
+          } else {
+            setTaskError({
+              // taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
+              // taskDesc: taskFormState?.taskDesc
+              //   ? ""
+              //   : "Description is Mandatory",
+              // taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
+              
+              // taskPriority: taskFormState?.taskPriority
+              // ? ""
+              // : "Priority is Mandatory",
+
+              taskMedia: taskFormState?.taskMedia
+                ? ""
+                : "Atleas one Media is Mandatory",
+            });
+          }
         }
       });
   };
@@ -105,18 +122,6 @@ export default function Home() {
   //     url: "",
   //   },
   // ]);
-
-  // // Function to display pictures
-  // const handleImageUpload = (e) => {
-  //   const tempArr = [];
-  //   [...e.target.files].forEach((file) => {
-  //     tempArr.push({
-  //       data: file,
-  //       url: URL.createObjectURL(file),
-  //     });
-  //   });
-  //   setPictures(tempArr);
-  // };
 
   //Create New task Code End
 
@@ -267,7 +272,8 @@ export default function Home() {
                       </div>
                       <div className="modal-body p-3">
                         <form>
-                          <div className="col-sm-12 p-0 mb-3">
+
+                          {/* <div className="col-sm-12 p-0 mb-3">
                             <label>Title</label>
                             <input
                               type="text"
@@ -326,6 +332,7 @@ export default function Home() {
                             </label>
                             <select
                               className="form-control"
+                              value={taskFormState?.taskPriority}
                               onChange={(e) => {
                                 setTaskFormState({
                                   ...taskFormState,
@@ -347,7 +354,7 @@ export default function Home() {
                             <small className="text-danger">
                               {taskError?.taskPriority}
                             </small>
-                          </div>
+                          </div> 
 
                           <div className="col-sm-12 p-0 mb-3">
                             <label className="d-block ">Task End Date</label>
@@ -358,6 +365,7 @@ export default function Home() {
                                   ? "invalid form-control"
                                   : "form-control"
                               }
+                              value={taskFormState?.taskDate}
                               onChange={(e) => {
                                 setTaskFormState({
                                   ...taskFormState,
@@ -371,7 +379,35 @@ export default function Home() {
                                 });
                               }}
                             />
-                            <small className="text-danger">{taskError?.taskDate}</small>
+                            <small className="text-danger">
+                              {taskError?.taskDate}
+                            </small>
+                          </div>*/}
+
+                          <div className="col-sm-12 p-0 mb-3">
+                            <label className="d-block">Upload Doc</label>
+                            <input
+                              type="file"
+                              multiple
+                              onChange={(e) => {
+                                // if (e.target.files?.length > 0) {
+                                  setTaskFormState({
+                                    ...taskFormState,
+                                    taskMedia: e.target.files ,
+                                  });
+                                  setTaskError({
+                                    ...taskError,
+                                    taskMedia: "",
+                                  });
+                                // } else {
+                                //   setTaskError({
+                                //     ...taskError,
+                                //     taskMedia: "At least one file is mandatory",
+                                //   });
+                                // }
+                              }}
+                            />
+                            <small>{taskError?.taskMedia}</small>
                           </div>
 
                           <div className="modal-footer">
@@ -385,12 +421,14 @@ export default function Home() {
                             <button
                               type="submit"
                               className="btn btn-primary"
-                              data-dismiss={
-                                taskFormState?.taskTitle &&
-                                taskFormState?.taskDate &&
-                                taskFormState?.taskDesc &&
-                                taskFormState?.taskPriority ? "modal" : ""
-                              }
+                              // data-dismiss={
+                              //   taskFormState?.taskTitle &&
+                              //   taskFormState?.taskDate &&
+                              //   taskFormState?.taskDesc &&
+                              //   taskFormState?.taskPriority
+                              //     ? "modal"
+                              //     : ""
+                              // }
                               onClick={(e) => {
                                 handleTask(e, sectionId);
                               }}
