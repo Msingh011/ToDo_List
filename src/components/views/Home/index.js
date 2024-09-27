@@ -8,11 +8,9 @@ export default function Home() {
   //Create New Section Code Start
   const sectionLocalStorage =
     JSON.parse(localStorage.getItem("sections")) || [];
-
   const [newSection, setNewSection] = useState(sectionLocalStorage);
-
   const [newSectionError, setNewSectionError] = useState({});
-
+  const [taskError, setTaskError] = useState({});
   const [taskFormState, setTaskFormState] = useState({
     taskTitle: "",
     taskDesc: "",
@@ -21,15 +19,18 @@ export default function Home() {
     taskMedia: [],
   });
 
-  console.log("MediaTask",taskFormState.taskMedia)
-  const [taskError, setTaskError] = useState({});
-
   //begin::Create New Section Code End
-
   const [formState, setFormState] = useState({
     sectionTitle: "",
   });
-
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // Converts file to Base64 format
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  }
   const sectionHandle = (e) => {
     e.preventDefault();
     if (formState?.sectionTitle) {
@@ -51,79 +52,65 @@ export default function Home() {
       });
     }
   };
-
-  console.log("sections", newSection);
   //end::Create New Section Code End
 
   //begin::Handle for Create New Add Task End
-
   const handleTask = (e, sectionId) => {
     e.preventDefault();
-
     const allSections = [...newSection];
-
     allSections &&
-      allSections.map((item) => {
+      allSections.map(async (item) => {
         if (sectionId === item?.sectionId) {
           if (
-            // taskFormState?.taskTitle &&
-            // taskFormState?.taskDesc &&
-            // taskFormState?.taskDate &&
-            // taskFormState?.taskPriority &&
-            taskFormState?.taskMedia
+            taskFormState?.taskTitle &&
+            taskFormState?.taskDesc &&
+            taskFormState?.taskDate &&
+            taskFormState?.taskPriority &&
+            taskFormState?.taskMedia.length > 0
           ) {
+            console.log("Task Media:", taskFormState?.taskMedia);
             // Add a unique task ID using Date.now()
             const newTask = {
               taskId: Date.now(), // Generate a unique ID for each task
-              // taskTitle: taskFormState?.taskTitle,
-              // taskDesc: taskFormState?.taskDesc,
-              // taskDate: taskFormState?.taskDate,
-              // taskPriority: taskFormState?.taskPriority,
-              taskMedia: taskFormState?.taskMedia,
+              taskTitle: taskFormState?.taskTitle,
+              taskDesc: taskFormState?.taskDesc,
+              taskDate: taskFormState?.taskDate,
+              taskPriority: taskFormState?.taskPriority,
+              taskMedia: await Promise.all(
+                Array.from(taskFormState?.taskMedia).map(
+                  async (file) => await fileToBase64(file)
+                )
+              ),
             };
             const updateTask = [...(item.tasks || []), newTask]; // Get existing tasks for this section or an empty array
             item.tasks = updateTask;
-            
+
             localStorage.setItem("sections", JSON.stringify(allSections));
             setNewSection(allSections);
             setTaskError({});
             setTaskFormState({
-              // taskTitle: "",
-              // taskDesc: "",
-              // taskDate: "",
-              // taskPriority: "",
+              taskTitle: "",
+              taskDesc: "",
+              taskDate: "",
+              taskPriority: "",
               taskMedia: [],
             });
           } else {
             setTaskError({
-              // taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
-              // taskDesc: taskFormState?.taskDesc
-              //   ? ""
-              //   : "Description is Mandatory",
-              // taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
-              
-              // taskPriority: taskFormState?.taskPriority
-              // ? ""
-              // : "Priority is Mandatory",
-
-              taskMedia: taskFormState?.taskMedia
+              taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
+              taskDesc: taskFormState?.taskDesc
                 ? ""
-                : "Atleas one Media is Mandatory",
+                : "Description is Mandatory",
+              taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
+              taskMedia:
+                taskFormState?.taskMedia.length > 0
+                  ? ""
+                  : "Atleas one Media is Mandatory",
             });
           }
         }
       });
   };
-
-  // // Set state of pictures
-  // const [pictures, setPictures] = useState([
-  //   {
-  //     data: [],
-  //     url: "",
-  //   },
-  // ]);
-
-  //Create New task Code End
 
   return (
     <div className="taskcreate p-4">
@@ -200,7 +187,7 @@ export default function Home() {
 
         {newSection &&
           newSection?.map((data, index) => {
-            const { sectionId, tasks } = data;
+            const { sectionId, tasks, taskId } = data;
             return (
               <>
                 <div className="col-sm-4" key={index}>
@@ -217,29 +204,116 @@ export default function Home() {
                   <div className="task-list mt-3">
                     {tasks?.length > 0 ? (
                       tasks.map((task, index) => (
-                        <div className="todo mb-3" key={index}>
-                          <div className="risk mb-3 d-flex justify-content-between">
-                            <span
-                              className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
+                        <>
+                          <div
+                            className="todo mb-3"
+                            key={index}
+                            data-toggle="modal"
+                            data-target={`#fullCardDetails${task?.taskId}`}
+                          >
+                            <div className="risk mb-3 d-flex justify-content-between">
+                              <span
+                                className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
+                              >
+                                {task?.taskPriority}
+                              </span>
+                              <RxLapTimer />
+                            </div>
+                            <div className="todocards mb-3">
+                              <p className="m-0">{task?.taskTitle}</p>
+                              <p className="m-0">{task?.taskDesc}</p>
+                            </div>
+                            <div className="assign-area  d-flex justify-content-between">
+                              {task?.taskMedia?.map((imageSrc, idx) => {
+                                console.log("imageSrc", task?.taskMedia);
+                                return (
+                                  <img
+                                    key={idx}
+                                    src={imageSrc}
+                                    alt={`task-media-${idx}`}
+                                    style={{
+                                      width: "50px",
+                                      height: "50px",
+                                      marginRight: "10px",
+                                    }}
+                                  />
+                                );
+                              })}
+                              <p className="m-0">
+                                Task End Date :{" "}
+                                {task?.taskDate
+                                  ? moment(task.taskDate).format("MM-DD-YYYY")
+                                  : "N/A"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Edit card view Start*/}
+                          <div
+                            className="modal fade show d-block"
+                            id={`fullCardDetails${task?.taskId}`}
+                            tabIndex="-1"
+                            role="dialog"
+                            aria-labelledby="fullCardDetails"
+                            aria-hidden="true"
+                          >
+                            <div
+                              className="modal-dialog modal-xl"
+                              role="document"
                             >
-                              {task?.taskPriority}
-                            </span>
-                            <RxLapTimer />
+                              <div className="modal-content">
+                                <div className="modal-header">
+                                  <h5 className="modal-title">Card Details</h5>
+                                  <button
+                                    type="button"
+                                    className="close"
+                                    data-dismiss="modal"
+                                    aria-label="Close"
+                                  >
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div className="modal-body p-3">
+                                  <form>
+                                    <div className="col-sm-12 p-0 mb-3">
+                                      <input
+                                        type="text"
+                                        className={
+                                          taskError?.taskTitle
+                                            ? "invalid form-control"
+                                            : "form-control"
+                                        }
+                                        value={taskFormState?.taskTitle}
+                                        onChange={(e) => {
+                                          setTaskFormState({
+                                            ...taskFormState,
+                                            taskTitle: e.target?.value,
+                                          });
+                                          setTaskError({
+                                            ...taskError,
+                                            taskTitle: e.target?.value
+                                              ? ""
+                                              : "Title is Mandatory",
+                                          });
+                                        }}
+                                      />
+                                      <small className="text-danger">
+                                        {taskError?.taskTitle}
+                                      </small>
+                                    </div>
+
+                                    <div className="col-sm-12 p-0 mb-3">
+Des
+                                    </div>
+                                  </form>
+
+                                  <p className="m-0">{task?.taskDesc}</p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="todocards mb-3">
-                            <p className="m-0">{task?.taskTitle}</p>
-                            <p className="m-0">{task?.taskDesc}</p>
-                          </div>
-                          <div className="assign-area  d-flex justify-content-between">
-                            <img src="https://c8.alamy.com/comp/2RCTH5W/img-logo-img-letter-img-letter-logo-design-initials-img-logo-linked-with-circle-and-uppercase-monogram-logo-img-typography-for-technology-busines-2RCTH5W.jpg" />
-                            <p className="m-0">
-                              Task End Date :{" "}
-                              {task?.taskDate
-                                ? moment(task.taskDate).format("MM-DD-YYYY")
-                                : "N/A"}
-                            </p>
-                          </div>
-                        </div>
+                          {/* Edit card view End*/}
+                        </>
                       ))
                     ) : (
                       <p>No tasks yet</p>
@@ -272,8 +346,7 @@ export default function Home() {
                       </div>
                       <div className="modal-body p-3">
                         <form>
-
-                          {/* <div className="col-sm-12 p-0 mb-3">
+                          <div className="col-sm-12 p-0 mb-3">
                             <label>Title</label>
                             <input
                               type="text"
@@ -338,12 +411,6 @@ export default function Home() {
                                   ...taskFormState,
                                   taskPriority: e.target?.value,
                                 });
-                                setTaskError({
-                                  ...taskError,
-                                  taskPriority: e.target?.value
-                                    ? ""
-                                    : "Priority is Mandatory",
-                                });
                               }}
                             >
                               <option value="">Select Priority</option>
@@ -351,10 +418,7 @@ export default function Home() {
                               <option>Med</option>
                               <option>High</option>
                             </select>
-                            <small className="text-danger">
-                              {taskError?.taskPriority}
-                            </small>
-                          </div> 
+                          </div>
 
                           <div className="col-sm-12 p-0 mb-3">
                             <label className="d-block ">Task End Date</label>
@@ -382,32 +446,33 @@ export default function Home() {
                             <small className="text-danger">
                               {taskError?.taskDate}
                             </small>
-                          </div>*/}
+                          </div>
 
                           <div className="col-sm-12 p-0 mb-3">
                             <label className="d-block">Upload Doc</label>
                             <input
                               type="file"
+                              accept=".png, .jpg, .jpeg, .pdf, .docx, .doc"
                               multiple
+                              className={
+                                taskError?.taskMedia
+                                  ? "invalid form-control"
+                                  : "form-control"
+                              }
                               onChange={(e) => {
-                                // if (e.target.files?.length > 0) {
-                                  setTaskFormState({
-                                    ...taskFormState,
-                                    taskMedia: e.target.files ,
-                                  });
-                                  setTaskError({
-                                    ...taskError,
-                                    taskMedia: "",
-                                  });
-                                // } else {
-                                //   setTaskError({
-                                //     ...taskError,
-                                //     taskMedia: "At least one file is mandatory",
-                                //   });
-                                // }
+                                setTaskFormState({
+                                  ...taskFormState,
+                                  taskMedia: e.target?.files,
+                                });
+                                setTaskError({
+                                  ...taskError,
+                                  taskMedia: "",
+                                });
                               }}
                             />
-                            <small>{taskError?.taskMedia}</small>
+                            <small className="text-danger">
+                              {taskError?.taskMedia}
+                            </small>
                           </div>
 
                           <div className="modal-footer">
@@ -421,14 +486,15 @@ export default function Home() {
                             <button
                               type="submit"
                               className="btn btn-primary"
-                              // data-dismiss={
-                              //   taskFormState?.taskTitle &&
-                              //   taskFormState?.taskDate &&
-                              //   taskFormState?.taskDesc &&
-                              //   taskFormState?.taskPriority
-                              //     ? "modal"
-                              //     : ""
-                              // }
+                              data-dismiss={
+                                taskFormState?.taskTitle &&
+                                taskFormState?.taskDate &&
+                                taskFormState?.taskDesc &&
+                                taskFormState?.taskPriority &&
+                                taskFormState?.taskMedia.length > 0
+                                  ? "modal"
+                                  : ""
+                              }
                               onClick={(e) => {
                                 handleTask(e, sectionId);
                               }}
