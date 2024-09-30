@@ -117,3 +117,20 @@ html {
   -ms-border-radius: 10px;
   -o-border-radius: 10px;
 }
+
+.sections.ul {
+  padding: 0;
+  overflow-x: auto;
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+
+.sections.ul li {
+  width: 25%;
+  display: block;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 0 6px;
+  height: 100%;
+}
