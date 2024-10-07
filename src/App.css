@@ -126,7 +126,7 @@ html {
   width: 100%;
 }
 
-.sections.ul li {
+.sections.ul li.card-list {
   width: 25%;
   display: block;
   flex-shrink: 0;

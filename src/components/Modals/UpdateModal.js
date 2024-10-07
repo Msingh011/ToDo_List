@@ -1,37 +1,33 @@
-import React from 'react'
+import React from "react";
 
-export default function EditModal ({task}) {
-    return (
-        <>
-        
-          {/* Edit card view Start*/}
-          <div
-                            className="modal fade"
-                            id={`fullCardDetails${task?.taskId}`}
-                            tabIndex="-1"
-                            role="dialog"
-                            aria-labelledby="fullCardDetails"
-                            aria-hidden="true"
-                          >
-                            <div
-                              className="modal-dialog modal-xl"
-                              role="document"
-                            >
-                              <div className="modal-content">
-                                <div className="modal-header">
-                                  <h5 className="modal-title">Card Details</h5>
-                                  <button
-                                    type="button"
-                                    className="close"
-                                    data-dismiss="modal"
-                                    aria-label="Close"
-                                  >
-                                    <span aria-hidden="true">&times;</span>
-                                  </button>
-                                </div>
-                                <div className="modal-body p-3">
-                                  <form>
-                                    {/* <div className="col-sm-12 p-0 mb-3">
+export default function EditModal({ task }) {
+  return (
+    <>
+      {/* Edit card view Start*/}
+      <div
+        className="modal fade"
+        id={`fullCardDetails${task?.taskId}`}
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="fullCardDetails"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-xl" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Card Details</h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body p-3">
+              <form>
+                {/* <div className="col-sm-12 p-0 mb-3">
                                       <input
                                         type="text"
                                         className={
@@ -58,17 +54,15 @@ export default function EditModal ({task}) {
                                       </small>
                                     </div> */}
 
-                                    <div className="col-sm-12 p-0 mb-3">
-                                      Des
-                                    </div>
-                                  </form>
+                <div className="col-sm-12 p-0 mb-3">Des</div>
+              </form>
 
-                                  <p className="m-0">{task?.taskDesc}</p> 
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          {/* Edit card view End*/}
-        </>
-    )
+              <p className="m-0">{task?.taskDesc}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Edit card view End*/}
+    </>
+  );
 }

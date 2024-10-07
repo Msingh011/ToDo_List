@@ -40,10 +40,13 @@ export default function Home() {
   };
   //end::Create New Section Code End
 
-   // Callback to get filtered data from AddTaskModal
-   const handleFilteredData = (data) => {
+  // Callback to get filtered data from AddTaskModal
+  const handleFilteredData = (data) => {
     setNewSection(data);
   };
+
+
+
   return (
     <div className="taskcreate p-4">
       <ul className="sections ul">
@@ -120,9 +123,10 @@ export default function Home() {
         {newSection &&
           newSection?.map((data, index) => {
             const { sectionId, tasks, taskId } = data;
+            
             return (
               <>
-                <li key={index}>
+                <li className="card-list" key={index}>
                   <h5>{data?.sectionTitle}</h5>
                   <button
                     className="addbutton"
@@ -133,16 +137,23 @@ export default function Home() {
                   </button>
 
                   {/* Display Task in Card View */}
-                  <div className="task-list mt-3"  draggable="true">
+                  <div className="task-list mt-3" draggable="true">
+                    
                     {tasks?.length > 0 ? (
                       tasks.map((task, index) => (
+                        console.log("task?.taskDate",new Date().toISOString().split("T")),
+                        console.log(",new Date",task?.taskDate.split("T")[0]),            
                         <>
                           <div
-                            className="todo mb-3"
+                            className={`todo mb-3 ${
+                              task?.taskDate && task?.taskDate.split("T")[0] < new Date().toISOString().split("T")[0]
+                                ? "border-danger"
+                                : ""
+                            }`}
                             key={index}
                             data-toggle="modal"
                             data-target={`#fullCardDetails${task?.taskId}`}
-                          >
+                            >
                             <div className="risk mb-3 d-flex justify-content-between">
                               <span
                                 className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
@@ -151,12 +162,25 @@ export default function Home() {
                               </span>
                               <RxLapTimer />
                             </div>
-                            <div className="todocards mb-3">
+                            <div className="todocards">
                               <p className="m-0">{task?.taskTitle}</p>
-                              <p className="m-0">{task?.taskDesc}</p>
+                  
+                              <div dangerouslySetInnerHTML={{ __html: task?.taskDesc }} className="border-bottom border-top my-3 py-2"/>
+
+                              <ReactReadMoreReadLess
+                                            charLimit={100}
+                                            readMoreText={"Read More"}
+                                            readLessText={"Read Less"}
+                                          >
+                                            {htmlToFormattedText(
+                                              page_content.textContent ||
+                                                page_content.innerText
+                                            )}
+                                          </ReactReadMoreReadLess>
+
                             </div>
                             <div className="assign-area  d-flex justify-content-between">
-                              {task?.taskMedia?.map((imageSrc, idx) => {
+                              {/* {task?.taskMedia?.map((imageSrc, idx) => {
                                 console.log("imageSrc", task?.taskMedia);
                                 return (
                                   <img
@@ -170,7 +194,7 @@ export default function Home() {
                                     }}
                                   />
                                 );
-                              })}
+                              })} */}
                               <p className="m-0">
                                 Task End Date :{" "}
                                 {task?.taskDate
@@ -181,7 +205,7 @@ export default function Home() {
                           </div>
 
                           {/* Edit card view Start*/}
-                  <EditModal task={task}/>
+                          <EditModal task={task} />
                           {/* Edit card view End*/}
                         </>
                       ))
@@ -192,16 +216,16 @@ export default function Home() {
                 </li>
 
                 {/**Add Task Modal**/}
-
-           <AddTaskModal sectionId={sectionId} onFilteredData={handleFilteredData} />
-
+                <AddTaskModal
+                  sectionId={sectionId}
+                  onFilteredData={handleFilteredData}
+                />
                 {/** Add Task Modal**/}
-
               </>
             );
           })}
 
-        <li className="">
+        <li className="card-list">
           <h5>Create Section</h5>
           <button
             className="addbutton"

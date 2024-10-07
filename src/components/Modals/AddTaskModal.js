@@ -1,4 +1,6 @@
 import React, { useState,useRef } from "react";
+import ReactQuill from "react-quill";
+import 'react-quill/dist/quill.snow.css';
 
 export default function AddTaskModal({ sectionId, onFilteredData }) {
   const sectionLocalStorage =
@@ -40,7 +42,8 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
             taskFormState?.taskPriority &&
             taskFormState?.taskMedia.length > 0
           ) {
-            console.log("Task Media:", taskFormState?.taskMedia);
+            //console.log("Task Media:", taskFormState?.taskMedia);
+            console.log("Task taskDesc:", taskFormState?.taskDesc);
             // Add a unique task ID using Date.now()
             const newTask = {
               taskId: Date.now(), // Generate a unique ID for each task
@@ -95,6 +98,24 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
       });
   };
 
+
+  //Editor
+  const [content, setContent] = useState('');
+  const handleEditorChange = (value) => {
+    setTaskFormState({
+      ...taskFormState,
+      taskDesc: value,
+    });
+    setTaskError({
+      ...taskError,
+      taskDesc: value
+        ? ""
+        : "Description is Mandatory",
+    });
+    setContent(value);
+    console.log("content",content)
+  };
+
   return (
     <>
       <div
@@ -105,7 +126,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-xl modal-center" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">
@@ -122,7 +143,8 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
             </div>
             <div className="modal-body p-3">
               <form>
-                <div className="col-sm-12 p-0 mb-3">
+                <div className="row">
+                <div className="col-sm-6  mb-3">
                   <label>Title</label>
                   <input
                     type="text"
@@ -145,31 +167,8 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   />
                   <small className="text-danger">{taskError?.taskTitle}</small>
                 </div>
-                <div className="col-sm-12 p-0 mb-3">
-                  <label>Description</label>
-                  <textarea
-                    className={
-                      taskError?.taskDesc
-                        ? "invalid form-control"
-                        : "form-control"
-                    }
-                    value={taskFormState?.taskDesc}
-                    onChange={(e) => {
-                      setTaskFormState({
-                        ...taskFormState,
-                        taskDesc: e.target?.value,
-                      });
-                      setTaskError({
-                        ...taskError,
-                        taskDesc: e.target?.value
-                          ? ""
-                          : "Description is Mandatory",
-                      });
-                    }}
-                  />
-                  <small className="text-danger">{taskError?.taskDesc}</small>
-                </div>
-                <div className="col-sm-12 p-0 mb-3">
+               
+                <div className="col-sm-6  mb-3">
                   <label htmlFor="exampleFormControlFile1">Task Priority</label>
                   <select
                     className="form-control"
@@ -188,7 +187,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   </select>
                 </div>
 
-                <div className="col-sm-12 p-0 mb-3">
+                <div className="col-sm-6  mb-3">
                   <label className="d-block ">Task End Date</label>
                   <input
                     type="date"
@@ -197,6 +196,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                         ? "invalid form-control"
                         : "form-control"
                     }
+                    min={new Date().toISOString().split("T")[0]} // Disable past 
                     value={taskFormState?.taskDate}
                     onChange={(e) => {
                       setTaskFormState({
@@ -212,7 +212,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   <small className="text-danger">{taskError?.taskDate}</small>
                 </div>
 
-                <div className="col-sm-12 p-0 mb-3">
+                <div className="col-sm-6  mb-3">
                   <label className="d-block">Upload Doc</label>
                   <input
                     type="file"
@@ -239,7 +239,36 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   <small className="text-danger">{taskError?.taskMedia}</small>
                 </div>
 
-                <div className="modal-footer">
+                <div className="col-sm-12 mb-3">
+                  <label>Description</label>
+                  <ReactQuill   theme="snow" className="h-100"
+                   value={content} onChange={handleEditorChange}
+                  />
+                   <div dangerouslySetInnerHTML={{ __html: content }} />
+                  {/* <textarea
+                    className={
+                      taskError?.taskDesc
+                        ? "invalid form-control"
+                        : "form-control"
+                    }
+                    value={taskFormState?.taskDesc}
+                    onChange={(e) => {
+                      setTaskFormState({
+                        ...taskFormState,
+                        taskDesc: e.target?.value,
+                      });
+                      setTaskError({
+                        ...taskError,
+                        taskDesc: e.target?.value
+                          ? ""
+                          : "Description is Mandatory",
+                      });
+                    }}
+                  /> */}
+                  <small className="text-danger">{taskError?.taskDesc}</small>
+                </div>
+
+                <div className="modal-footer col-sm-12">
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -265,6 +294,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   >
                     Save changes
                   </button>
+                </div>
                 </div>
               </form>
             </div>
