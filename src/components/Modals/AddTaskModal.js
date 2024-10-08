@@ -1,6 +1,6 @@
-import React, { useState,useRef } from "react";
-import ReactQuill from "react-quill";
-import 'react-quill/dist/quill.snow.css';
+import React, { useState, useRef, useMemo } from "react";
+import ReactQuill, { Quill } from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 export default function AddTaskModal({ sectionId, onFilteredData }) {
   const sectionLocalStorage =
@@ -16,8 +16,8 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
     taskMedia: [],
   });
 
-    // Ref to handle the file input
-    const fileInputRef = useRef(null);
+  // Ref to handle the file input
+  const fileInputRef = useRef(null);
 
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -61,15 +61,14 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
             item.tasks = updateTask;
 
             localStorage.setItem("sections", JSON.stringify(allSections));
-            console.log("fsdfs",  JSON.stringify(allSections))
-            
-            
+            console.log("fsdfs", JSON.stringify(allSections));
+
             // Call the callback function to pass filtered data
             if (onFilteredData) {
               onFilteredData(allSections);
             }
-            console.log("all",allSections)
-           
+            console.log("all", allSections);
+
             setTaskError({});
             setTaskFormState({
               taskTitle: "",
@@ -98,9 +97,8 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
       });
   };
 
-
   //Editor
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const handleEditorChange = (value) => {
     setTaskFormState({
       ...taskFormState,
@@ -108,13 +106,51 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
     });
     setTaskError({
       ...taskError,
-      taskDesc: value
-        ? ""
-        : "Description is Mandatory",
+      taskDesc: value ? "" : "Description is Mandatory",
     });
     setContent(value);
-    console.log("content",content)
+    console.log("content", content);
   };
+
+  const modules = {
+    toolbar: [
+      [{ header: '1' }, { header: '2' }, { font: [] }],
+      [{ size: [] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' }
+      ],
+      ['link', 'image', 'video'],
+      ['clean']
+    ],
+    clipboard: {
+      // toggle to add extra line breaks when pasting HTML:
+      matchVisual: false
+    },
+    // imageResize: {
+    //   parchment: Quill.import('parchment'),
+    //   modules: ['Resize', 'DisplaySize']
+    // }
+  }
+  const formats = [
+    'header',
+    'font',
+    'size',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'blockquote',
+    'list',
+    'bullet',
+    'indent',
+    'link',
+    'image',
+    'video'
+  ];
 
   return (
     <>
@@ -144,108 +180,119 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
             <div className="modal-body p-3">
               <form>
                 <div className="row">
-                <div className="col-sm-6  mb-3">
-                  <label>Title</label>
-                  <input
-                    type="text"
-                    className={
-                      taskError?.taskTitle
-                        ? "invalid form-control"
-                        : "form-control"
-                    }
-                    value={taskFormState?.taskTitle}
-                    onChange={(e) => {
-                      setTaskFormState({
-                        ...taskFormState,
-                        taskTitle: e.target?.value,
-                      });
-                      setTaskError({
-                        ...taskError,
-                        taskTitle: e.target?.value ? "" : "Title is Mandatory",
-                      });
-                    }}
-                  />
-                  <small className="text-danger">{taskError?.taskTitle}</small>
-                </div>
-               
-                <div className="col-sm-6  mb-3">
-                  <label htmlFor="exampleFormControlFile1">Task Priority</label>
-                  <select
-                    className="form-control"
-                    value={taskFormState?.taskPriority}
-                    onChange={(e) => {
-                      setTaskFormState({
-                        ...taskFormState,
-                        taskPriority: e.target?.value,
-                      });
-                    }}
-                  >
-                    <option value="">Select Priority</option>
-                    <option>Low</option>
-                    <option>Med</option>
-                    <option>High</option>
-                  </select>
-                </div>
+                  <div className="col-sm-6  mb-3">
+                    <label>Title</label>
+                    <input
+                      type="text"
+                      className={
+                        taskError?.taskTitle
+                          ? "invalid form-control"
+                          : "form-control"
+                      }
+                      value={taskFormState?.taskTitle}
+                      onChange={(e) => {
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskTitle: e.target?.value,
+                        });
+                        setTaskError({
+                          ...taskError,
+                          taskTitle: e.target?.value
+                            ? ""
+                            : "Title is Mandatory",
+                        });
+                      }}
+                    />
+                    <small className="text-danger">
+                      {taskError?.taskTitle}
+                    </small>
+                  </div>
 
-                <div className="col-sm-6  mb-3">
-                  <label className="d-block ">Task End Date</label>
-                  <input
-                    type="date"
-                    className={
-                      taskError?.taskDate
-                        ? "invalid form-control"
-                        : "form-control"
-                    }
-                    min={new Date().toISOString().split("T")[0]} // Disable past 
-                    value={taskFormState?.taskDate}
-                    onChange={(e) => {
-                      setTaskFormState({
-                        ...taskFormState,
-                        taskDate: e.target?.value,
-                      });
-                      setTaskError({
-                        ...taskError,
-                        taskDate: e.target?.value ? "" : "Date is Mandatory",
-                      });
-                    }}
-                  />
-                  <small className="text-danger">{taskError?.taskDate}</small>
-                </div>
+                  <div className="col-sm-6  mb-3">
+                    <label htmlFor="exampleFormControlFile1">
+                      Task Priority
+                    </label>
+                    <select
+                      className="form-control"
+                      value={taskFormState?.taskPriority}
+                      onChange={(e) => {
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskPriority: e.target?.value,
+                        });
+                      }}
+                    >
+                      <option value="">Select Priority</option>
+                      <option>Low</option>
+                      <option>Med</option>
+                      <option>High</option>
+                    </select>
+                  </div>
 
-                <div className="col-sm-6  mb-3">
-                  <label className="d-block">Upload Doc</label>
-                  <input
-                    type="file"
-                    ref={fileInputRef} 
-                    accept=".png, .jpg, .jpeg, .pdf, .docx, .doc"
-                    multiple
-                    className={
-                      taskError?.taskMedia
-                        ? "invalid form-control"
-                        : "form-control"
-                    }
-                    onChange={(e) => {
-                      setTaskFormState({
-                        ...taskFormState,
-                        taskMedia: e.target?.files,
-                      });
-                      setTaskError({
-                        ...taskError,
-                        taskMedia: "",
-                      });
-                    }}
-                  />
-                  
-                  <small className="text-danger">{taskError?.taskMedia}</small>
-                </div>
+                  <div className="col-sm-6  mb-3">
+                    <label className="d-block ">Task End Date</label>
+                    <input
+                      type="date"
+                      className={
+                        taskError?.taskDate
+                          ? "invalid form-control"
+                          : "form-control"
+                      }
+                      min={new Date().toISOString().split("T")[0]} // Disable past
+                      value={taskFormState?.taskDate}
+                      onChange={(e) => {
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskDate: e.target?.value,
+                        });
+                        setTaskError({
+                          ...taskError,
+                          taskDate: e.target?.value ? "" : "Date is Mandatory",
+                        });
+                      }}
+                    />
+                    <small className="text-danger">{taskError?.taskDate}</small>
+                  </div>
 
-                <div className="col-sm-12 mb-3">
-                  <label>Description</label>
-                  <ReactQuill   theme="snow" className="h-100"
-                   value={content} onChange={handleEditorChange}
-                  />
-                   <div dangerouslySetInnerHTML={{ __html: content }} />
-                  {/* <textarea
+                  <div className="col-sm-6  mb-3">
+                    <label className="d-block">Upload Doc</label>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept=".png, .jpg, .jpeg, .pdf, .docx, .doc"
+                      multiple
+                      className={
+                        taskError?.taskMedia
+                          ? "invalid form-control"
+                          : "form-control"
+                      }
+                      onChange={(e) => {
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskMedia: e.target?.files,
+                        });
+                        setTaskError({
+                          ...taskError,
+                          taskMedia: "",
+                        });
+                      }}
+                    />
+
+                    <small className="text-danger">
+                      {taskError?.taskMedia}
+                    </small>
+                  </div>
+
+                  <div className="col-sm-12 mb-3">
+                    <label>Description</label>
+                    <ReactQuill
+                      formats={formats}
+                      modules={modules}
+                      value={content}
+                      onChange={handleEditorChange}
+                    />
+
+                    {/* <textarea
                     className={
                       taskError?.taskDesc
                         ? "invalid form-control"
@@ -265,9 +312,10 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                       });
                     }}
                   /> */}
-                  <small className="text-danger">{taskError?.taskDesc}</small>
+                    <small className="text-danger">{taskError?.taskDesc}</small>
+                  </div>
+                  {/* <div className="col-sm-12" dangerouslySetInnerHTML={{ __html: content }} /> */}
                 </div>
-
                 <div className="modal-footer col-sm-12">
                   <button
                     type="button"
@@ -294,7 +342,6 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   >
                     Save changes
                   </button>
-                </div>
                 </div>
               </form>
             </div>

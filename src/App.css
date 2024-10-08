@@ -134,3 +134,6 @@ html {
   padding: 0 6px;
   height: 100%;
 }
+.quill .ql-editor {
+  min-height: 15em;
+}
