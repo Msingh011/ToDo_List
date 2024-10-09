@@ -137,3 +137,18 @@ html {
 .quill .ql-editor {
   min-height: 15em;
 }
+.readmore {
+  margin-left: auto;
+  display: table;
+  border: 1px solid;
+  border-radius: 3px;
+  font-size: 12px;
+  text-transform: capitalize;
+  padding: 1px 5px;
+  background-color: #474747;
+  color: #ffffff;
+  cursor: pointer;
+}
+.cursor-pointer {
+  cursor: pointer;
+}

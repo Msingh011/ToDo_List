@@ -8,6 +8,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
   const [newSection, setNewSection] = useState(sectionLocalStorage);
   const [newSectionError, setNewSectionError] = useState({});
   const [taskError, setTaskError] = useState({});
+  const [content, setContent] = useState("");
   const [taskFormState, setTaskFormState] = useState({
     taskTitle: "",
     taskDesc: "",
@@ -31,6 +32,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
   //Handle for Create New Add Task End
   const handleTask = (e, sectionId) => {
     e.preventDefault();
+    setContent("");
     const allSections = [...newSection];
     allSections &&
       allSections.map(async (item) => {
@@ -98,7 +100,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
   };
 
   //Editor
-  const [content, setContent] = useState("");
+
   const handleEditorChange = (value) => {
     setTaskFormState({
       ...taskFormState,
@@ -291,27 +293,6 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                       value={content}
                       onChange={handleEditorChange}
                     />
-
-                    {/* <textarea
-                    className={
-                      taskError?.taskDesc
-                        ? "invalid form-control"
-                        : "form-control"
-                    }
-                    value={taskFormState?.taskDesc}
-                    onChange={(e) => {
-                      setTaskFormState({
-                        ...taskFormState,
-                        taskDesc: e.target?.value,
-                      });
-                      setTaskError({
-                        ...taskError,
-                        taskDesc: e.target?.value
-                          ? ""
-                          : "Description is Mandatory",
-                      });
-                    }}
-                  /> */}
                     <small className="text-danger">{taskError?.taskDesc}</small>
                   </div>
                   {/* <div className="col-sm-12" dangerouslySetInnerHTML={{ __html: content }} /> */}
