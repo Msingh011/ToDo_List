@@ -6,7 +6,6 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
   const sectionLocalStorage =
     JSON.parse(localStorage.getItem("sections")) || [];
   const [newSection, setNewSection] = useState(sectionLocalStorage);
-  const [newSectionError, setNewSectionError] = useState({});
   const [taskError, setTaskError] = useState({});
   const [content, setContent] = useState("");
   const [taskFormState, setTaskFormState] = useState({
@@ -63,7 +62,6 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
             item.tasks = updateTask;
 
             localStorage.setItem("sections", JSON.stringify(allSections));
-            console.log("fsdfs", JSON.stringify(allSections));
 
             // Call the callback function to pass filtered data
             if (onFilteredData) {

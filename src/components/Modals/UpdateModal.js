@@ -3,27 +3,21 @@ import { useRef } from "react";
 import ReactQuill from "react-quill";
 
 export default function EditModal(props) {
-
-  const {task,onFilteredData,sectionId} = props;
-
-  console.log("Task:", task);
-  console.log("Filtered Data:", onFilteredData);
-  console.log("Section ID:", sectionId);
-
+  const { task, onFilteredData, sectionId } = props;
 
   const sectionLocalStorage =
-  JSON.parse(localStorage.getItem("sections")) || [];
-const [newSection, setNewSection] = useState(sectionLocalStorage);
-const [newSectionError, setNewSectionError] = useState({});
-const [taskError, setTaskError] = useState({});
-const [content, setContent] = useState("");
-const [taskFormState, setTaskFormState] = useState({
-  taskTitle: task?.taskTitle,
-  taskDesc: task?.taskDesc,
-  taskDate: task?.taskDate,
-  taskPriority: task?.taskPriority,
-  taskMedia: [],
-});
+    JSON.parse(localStorage.getItem("sections")) || [];
+  const [newSection, setNewSection] = useState(sectionLocalStorage);
+  const [newSectionError, setNewSectionError] = useState({});
+  const [taskError, setTaskError] = useState({});
+  const [content, setContent] = useState("");
+  const [taskFormState, setTaskFormState] = useState({
+    taskTitle: task?.taskTitle,
+    taskDesc: task?.taskDesc,
+    taskDate: task?.taskDate,
+    taskPriority: task?.taskPriority,
+    // taskMedia: [],
+  });
 
   // Ref to handle the file input
   const fileInputRef = useRef(null);
@@ -36,79 +30,44 @@ const [taskFormState, setTaskFormState] = useState({
       reader.onerror = (error) => reject(error);
     });
   }
-    //Handle for Create New Add Task End
-    const handleTask = (e, sectionId) => {
-      e.preventDefault();
-      setContent("");
-      const allSections = [...newSection];
+
+  //Handle for Create New Add Task End
+  const handleTask = (e, sectionId) => {
+    e.preventDefault();
+
+    const allSections = [...newSection];
+
+    const updatedSections =
       allSections &&
-        allSections.map(async (item) => {
-          if (sectionId === item?.sectionId) {
-            if (
-              taskFormState?.taskTitle &&
-              taskFormState?.taskDesc &&
-              taskFormState?.taskDate &&
-              taskFormState?.taskPriority &&
-              taskFormState?.taskMedia.length > 0
-            ) {
-              //console.log("Task Media:", taskFormState?.taskMedia);
-              console.log("Task taskDesc:", taskFormState?.taskDesc);
-              // Add a unique task ID using Date.now()
-              const newTask = {
-                taskId: Date.now(), // Generate a unique ID for each task
-                taskTitle: taskFormState?.taskTitle,
-                taskDesc: taskFormState?.taskDesc,
-                taskDate: taskFormState?.taskDate,
-                taskPriority: taskFormState?.taskPriority,
-                taskMedia: await Promise.all(
-                  Array.from(taskFormState?.taskMedia).map(
-                    async (file) => await fileToBase64(file)
-                  )
-                ),
-              };
-              const updateTask = [...(item.tasks || []), newTask]; // Get existing tasks for this section or an empty array
-              item.tasks = updateTask;
-  
-              localStorage.setItem("sections", JSON.stringify(allSections));
-              console.log("fsdfs", JSON.stringify(allSections));
-  
-              // Call the callback function to pass filtered data
-              if (onFilteredData) {
-                onFilteredData(allSections);
+      allSections.map((item) => {
+        console.log("item", item);
+        if (sectionId === item?.sectionId) {
+          item.tasks &&
+            item.tasks.map((subItems) => {
+              if (subItems.taskId === task.taskId) {
+                subItems.taskTitle =
+                  taskFormState?.taskTitle || subItems.taskTitle;
+                subItems.taskPriority =
+                  taskFormState?.taskPriority || subItems.taskPriority;
+                subItems.taskDate =
+                  taskFormState?.taskDate || subItems.taskDate;
+                subItems.taskDesc =
+                  taskFormState?.taskDesc || subItems.taskDesc;
               }
-              console.log("all", allSections);
-  
-              setTaskError({});
-              setTaskFormState({
-                taskTitle: "",
-                taskDesc: "",
-                taskDate: "",
-                taskPriority: "",
-                taskMedia: [],
-              });
-              if (fileInputRef.current) {
-                fileInputRef.current.value = null;
-              }
-            } else {
-              setTaskError({
-                taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
-                taskDesc: taskFormState?.taskDesc
-                  ? ""
-                  : "Description is Mandatory",
-                taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
-                taskMedia:
-                  taskFormState?.taskMedia.length > 0
-                    ? ""
-                    : "At least one Media is Mandatory",
-              });
-            }
-          }
-        });
-    };
-  
-  
+            });
+        }
+        return item;
+      });
+    console.log("updatedSections", updatedSections);
+
+    localStorage.setItem("sections", JSON.stringify(updatedSections));
+    // Call the callback function to pass filtered data
+    if (onFilteredData) {
+      onFilteredData(updatedSections);
+    }
+  };
+
   return (
-    
     <>
       {/* Edit card view Start*/}
       <div
@@ -122,8 +81,7 @@ const [taskFormState, setTaskFormState] = useState({
         <div className="modal-dialog modal-xl" role="document">
           <div className="modal-content">
             <div className="modal-header">
-            
-              <h5 className="modal-title">Task Details</h5>
+              <h5 className="modal-title">Task Details {task?.taskId}</h5>
               <button
                 type="button"
                 className="close"
@@ -134,19 +92,18 @@ const [taskFormState, setTaskFormState] = useState({
               </button>
             </div>
             <div className="modal-body p-3">
-              <form>
-              <div className="row">
+              <form method="POST">
+                <div className="row">
                   <div className="col-sm-6  mb-3">
                     <label>Title</label>
                     <input
                       type="text"
-                      defaultValue={task?.taskTitle}
+                      defaultValue={taskFormState?.taskTitle}
                       className={
                         taskError?.taskTitle
                           ? "invalid form-control"
                           : "form-control text-capitalize"
                       }
-              
                       onChange={(e) => {
                         setTaskFormState({
                           ...taskFormState,
@@ -171,7 +128,7 @@ const [taskFormState, setTaskFormState] = useState({
                     </label>
                     <select
                       className="form-control"
-                      value={task?.taskPriority}
+                      value={taskFormState.taskPriority}
                       onChange={(e) => {
                         setTaskFormState({
                           ...taskFormState,
@@ -196,7 +153,7 @@ const [taskFormState, setTaskFormState] = useState({
                           : "form-control"
                       }
                       min={new Date().toISOString().split("T")[0]} // Disable past
-                      defaultValue={task?.taskDate}
+                      defaultValue={taskFormState?.taskDate}
                       onChange={(e) => {
                         setTaskFormState({
                           ...taskFormState,
@@ -211,7 +168,7 @@ const [taskFormState, setTaskFormState] = useState({
                     <small className="text-danger">{taskError?.taskDate}</small>
                   </div>
 
-                  <div className="col-sm-6  mb-3">
+                  {/* <div className="col-sm-6  mb-3">
                     <label className="d-block">Upload Doc</label>
                     <input
                       type="file"
@@ -238,42 +195,40 @@ const [taskFormState, setTaskFormState] = useState({
                     <small className="text-danger">
                       {taskError?.taskMedia}
                     </small>
-                  </div>
+                  </div> */}
 
                   {task?.taskMedia?.map((imageSrc, idx) => {
-                                  console.log("imageSrc", task?.taskMedia);
-                                  return (
-                                    <img
-                                      key={idx}
-                                      src={imageSrc}
-                                      alt={`task-media-${idx}`}
-                                      style={{
-                                        width: "50px",
-                                        height: "50px",
-                                        marginRight: "10px",
-                                      }}
-                                    />
-                                  );
-                                })}
+                    // console.log("imageSrc", task?.taskMedia);
+                    return (
+                      <img
+                        key={idx}
+                        src={imageSrc}
+                        alt={`task-media-${idx}`}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          marginRight: "10px",
+                        }}
+                      />
+                    );
+                  })}
                   <div className="col-sm-12 mb-3">
                     <label>Description</label>
+
                     <ReactQuill
                       placeholder="Type here"
-                      defaultValue={task?.taskDesc}
-                    
+                      defaultValue={taskFormState.taskDesc}
+                      onChange={(value) =>
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskDesc: value,
+                        })
+                      }
                     />
-                    <div
-                                    className="text-capitalize"
-                                    dangerouslySetInnerHTML={{
-                                      __html: task?.taskDesc,
-                                    }}
-                                  />
+
                     <small className="text-danger">{taskError?.taskDesc}</small>
                   </div>
-
                 </div>
-
-         
 
                 <div className="modal-footer col-sm-12">
                   <button
@@ -288,11 +243,11 @@ const [taskFormState, setTaskFormState] = useState({
                     className="btn btn-primary"
                     data-dismiss={
                       taskFormState?.taskTitle &&
-                      taskFormState?.taskDate &&
-                      taskFormState?.taskDesc &&
                       taskFormState?.taskPriority &&
-                      taskFormState?.taskMedia.length > 0
-                        ? "modal"
+                      taskFormState?.taskDate &&
+                      taskFormState?.taskDesc
+                        ? // taskFormState?.taskMedia.length > 0
+                          "modal"
                         : ""
                     }
                     onClick={(e) => {

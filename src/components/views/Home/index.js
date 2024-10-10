@@ -9,6 +9,8 @@ import ReactReadMoreReadLess from "react-read-more-read-less";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { EyeFilled } from "@ant-design/icons";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import DeleteTask from "../DeleteTask";
 
 export default function Home() {
   //Create New Section Code Start
@@ -17,6 +19,8 @@ export default function Home() {
   const [newSection, setNewSection] = useState(sectionLocalStorage);
   const [newSectionError, setNewSectionError] = useState({});
   //begin::Create New Section Code End
+  const [deleted, setDeleted] = useState (false);
+
   const [formState, setFormState] = useState({
     sectionTitle: "",
   });
@@ -127,128 +131,140 @@ export default function Home() {
 
         {newSection &&
           newSection?.map((data, index) => {
-            const { sectionId, tasks, taskId } = data;
+            if(data){
+              const { sectionId, tasks, taskId } = data;
 
-            return (
-              <>
-                <li className="card-list" key={index}>
-                  <h5>{data?.sectionTitle}</h5>
-                  <button
-                    className="addbutton"
-                    data-toggle="modal"
-                    data-target={`#exampleModal${sectionId}`}
-                  >
-                    <FiPlusCircle className="mr-2" /> Add task
-                  </button>
+              return (
+                <>
+                  <li className="card-list" key={index}>
+                    <h5>{data?.sectionTitle}</h5>
+                    <button
+                      className="addbutton"
+                      data-toggle="modal"
+                      data-target={`#exampleModal${sectionId}`}
+                    >
+                      <FiPlusCircle className="mr-2" /> Add task
+                    </button>
 
-                  {/* Display Task in Card View */}
-                  <div className="task-list mt-3">
-                    {tasks?.length > 0 ? (
-                      tasks.map((task, index, taskId) => {
-                        const toggleReadMore = (taskId) => {
-                          if (currentTaskID === taskId) {
-                            setIsExtand(!isExtand);
-                          }
-                          setCurrentTaskID(taskId);
-                        };
-                        const contentLimit = 50;
-                        const taskDesc = task?.taskDesc || "";
-                        const readMore = taskDesc.length > contentLimit;
+                    {/* Display Task in Card View */}
+                    <div className="task-list mt-3">
+                      {tasks?.length > 0 ? (
+                        tasks.map((task, index, taskId) => {
+                          const toggleReadMore = (taskId) => {
+                            if (currentTaskID === taskId) {
+                              setIsExtand(!isExtand);
+                            }
+                            setCurrentTaskID(taskId);
+                          };
+                          const contentLimit = 50;
+                          const taskDesc = task?.taskDesc || "";
+                          const readMore = taskDesc.length > contentLimit;
 
-                        const content =
-                          currentTaskID === task?.taskId && isExtand
-                            ? taskDesc
-                            : taskDesc.substring(0, contentLimit) +
-                              (readMore ? "..." : "");
-                        return (
-                          <>
-                            <div
-                              className={`todo mb-3 ${
-                                task?.taskDate &&
-                                task?.taskDate.split("T")[0] <
-                                  new Date().toISOString().split("T")[0]
-                                  ? "border-danger"
-                                  : ""
-                              }`}
-                              key={index}
-                            >
-                              <div className="risk mb-3 d-flex justify-content-between">
-                                <span
-                                  className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
-                                >
-                                  {task?.taskPriority}
-                                </span>
-                                <RxLapTimer />
-                              </div>
-                              <div className="todocards">
-                                <p className="m-0">{task?.taskTitle}</p>
-
-                                <div className="border-bottom border-top my-3 py-2">
-                                  <div
-                                    className="text-capitalize"
-                                    dangerouslySetInnerHTML={{
-                                      __html: content,
-                                    }}
+                          const content =
+                            currentTaskID === task?.taskId && isExtand
+                              ? taskDesc
+                              : taskDesc.substring(0, contentLimit) +
+                                (readMore ? "..." : "");
+                          return (
+                            <>
+                              <div
+                                className={`todo mb-3 ${
+                                  task?.taskDate &&
+                                  task?.taskDate.split("T")[0] <
+                                    new Date().toISOString().split("T")[0]
+                                    ? "border-danger"
+                                    : ""
+                                }`}
+                                key={index}
+                              >
+                                {task?.taskId} 
+                                  <RiDeleteBin6Line  className="bg-danger cursor-pointer d-block mb-2 ml-auto rounded text-white delete-icon"
+                                   data-toggle="modal"
+                                   data-target={`#deletemodal${task?.taskId}`}
+                                   />
+                                  <DeleteTask 
+                                  deleted= {deleted}
+                                  task={task}
+                                  setDeleted={setDeleted}
                                   />
-
-                                  {readMore && (
-                                    <span
-                                      className="readmore"
-                                      onClick={() =>
-                                        toggleReadMore(task?.taskId)
-                                      }
-                                    >
-                                      {currentTaskID === task?.taskId &&
-                                      isExtand
-                                        ? "Read less"
-                                        : "Read more"}
-                                    </span>
-                                  )}
+                                <div className="risk mb-3 d-flex justify-content-between">
+                                  <span
+                                    className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
+                                  >
+                                    {task?.taskPriority}
+                                  </span>
+                                  <RxLapTimer />
                                 </div>
+                                <div className="todocards">
+                                  <p className="m-0">{task?.taskTitle}</p>
+
+                                  <div className="border-bottom border-top my-3 py-2">
+                                    <div
+                                      className="text-capitalize"
+                                      dangerouslySetInnerHTML={{
+                                        __html: content,
+                                      }}
+                                    />
+
+                                    {readMore && (
+                                      <span
+                                        className="readmore"
+                                        onClick={() =>
+                                          toggleReadMore(task?.taskId)
+                                        }
+                                      >
+                                        {currentTaskID === task?.taskId &&
+                                        isExtand
+                                          ? "Read less"
+                                          : "Read more"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                          
+                                  <div className="d-flex justify-content-between">
+                                    <EyeFilled
+                                      className="cursor-pointer"
+                                      data-toggle="modal"
+                                      data-target={`#fullCardDetails${task?.taskId}`}
+                                    />
+                                    <p className="m-0">
+                                      Task End Date :{" "}
+                                      {task?.taskDate
+                                        ? moment(task.taskDate).format(
+                                            "MM-DD-YYYY"
+                                          )
+                                        : "N/A"}
+                                    </p>
+                                  </div>
+                              
                               </div>
-                        
-                                <div className="d-flex justify-content-between">
-                                  <EyeFilled
-                                    className="cursor-pointer"
-                                    data-toggle="modal"
-                                    data-target={`#fullCardDetails${task?.taskId}`}
-                                  />
-                                  <p className="m-0">
-                                    Task End Date :{" "}
-                                    {task?.taskDate
-                                      ? moment(task.taskDate).format(
-                                          "MM-DD-YYYY"
-                                        )
-                                      : "N/A"}
-                                  </p>
-                                </div>
-                             
-                            </div>
 
-                            {/* Edit card view Start*/}
-                            <EditModal
-                              task={task}
-                              sectionId={sectionId}
-                              onFilteredData={handleFilteredData}
-                            />
-                            {/* Edit card view End*/}
-                          </>
-                        );
-                      })
-                    ) : (
-                      <p>No tasks yet</p>
-                    )}
-                  </div>
-                </li>
+                              {/* Edit card view Start*/}
+                              <EditModal
+                                task={task}
+                                sectionId={sectionId}
+                                onFilteredData={handleFilteredData}
+                              />
+                              {/* Edit card view End*/}
+                            </>
+                          );
+                        })
+                      ) : (
+                        <p>No tasks yet</p>
+                      )}
+                    </div>
+                  </li>
 
-                {/**Add Task Modal**/}
-                <AddTaskModal
-                  sectionId={sectionId}
-                  onFilteredData={handleFilteredData}
-                />
-                {/** Add Task Modal**/}
-              </>
-            );
+                  {/**Add Task Modal**/}
+                  <AddTaskModal
+                    sectionId={sectionId}
+                    onFilteredData={handleFilteredData}
+                  />
+                  {/** Add Task Modal**/}
+                </>
+              );
+            }
           })}
 
         <li className="card-list">
