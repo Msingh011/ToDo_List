@@ -183,9 +183,10 @@ export default function Home() {
                                    data-target={`#deletemodal${task?.taskId}`}
                                    />
                                   <DeleteTask 
-                                  deleted= {deleted}
-                                  task={task}
-                                  setDeleted={setDeleted}
+                                    data={sectionLocalStorage}
+                                    task={task}
+                                    sectionId={sectionId}
+                                    onFilteredData={handleFilteredData}
                                   />
                                 <div className="risk mb-3 d-flex justify-content-between">
                                   <span

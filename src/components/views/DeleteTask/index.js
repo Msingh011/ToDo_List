@@ -1,25 +1,36 @@
 import React, { useState } from "react";
 
 export default function DeleteTask(props) {
-  const { task, setDeleted } = props;
+    const { task, data, sectionId, onFilteredData} = props;
 
-  const sectionLocalStorage =
-    JSON.parse(localStorage.getItem("sections")) || [];
+   
 
-    const [newSection, setNewSection] = useState(sectionLocalStorage);
-
-  const handleDelete = (e) => {
-    console.log("e", e)
-    const deleteData = [...sectionLocalStorage];
-    console.log("deleteData" , deleteData)
-    deleteData.splice(e, 1);
-    localStorage.setItem("sections", JSON.stringify(deleteData));
-    setNewSection(deleteData);
-    console.log("delete",deleteData)
+  const handleDeleteTask = () => {
+    const updatedSections = data && data.map((section) => {
+      if (section.sectionId === sectionId) {
+        console.log(section.tasks.length)
+        //count tasks length and if it is 1 
+        if(section.tasks.length===1){
 
 
+        }
+       // section.tasks = section.tasks.filter((t) => t.taskId !== task?.taskId); 
+    //    if(i==="yes"){
+
+    //    }
+      }
+      return section;
+    });
+    localStorage.setItem("sections", JSON.stringify(updatedSections));
+
+    // Call the callback function to pass filtered data
+    if (onFilteredData) {
+      onFilteredData(updatedSections);
+    }
   };
-
+ 
+   
+  
 
   return (
     <>
@@ -58,7 +69,8 @@ export default function DeleteTask(props) {
                       type="button"
                       className="ant-btn ant-btn-default ant-btn-dangerous"
                       data-dismiss="modal"
-                      onClick={(e) => handleDelete(e)}>
+                      onClick={() => handleDeleteTask()}>
+                    
                       <span>Yes</span>
                     </button>
                   </div>

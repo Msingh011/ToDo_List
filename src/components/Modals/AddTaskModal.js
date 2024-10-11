@@ -45,9 +45,9 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
           ) {
             //console.log("Task Media:", taskFormState?.taskMedia);
             console.log("Task taskDesc:", taskFormState?.taskDesc);
-            // Add a unique task ID using Date.now()
+          
             const newTask = {
-              taskId: Date.now(), // Generate a unique ID for each task
+              taskId: Date.now(),
               taskTitle: taskFormState?.taskTitle,
               taskDesc: taskFormState?.taskDesc,
               taskDate: taskFormState?.taskDate,
@@ -58,7 +58,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                 )
               ),
             };
-            const updateTask = [...(item.tasks || []), newTask]; // Get existing tasks for this section or an empty array
+            const updateTask = [...(item.tasks || []), newTask];
             item.tasks = updateTask;
 
             localStorage.setItem("sections", JSON.stringify(allSections));
