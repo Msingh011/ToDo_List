@@ -112,46 +112,6 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
     console.log("content", content);
   };
 
-  const modules = {
-    toolbar: [
-      [{ header: '1' }, { header: '2' }, { font: [] }],
-      [{ size: [] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [
-        { list: 'ordered' },
-        { list: 'bullet' },
-        { indent: '-1' },
-        { indent: '+1' }
-      ],
-      ['link', 'image', 'video'],
-      ['clean']
-    ],
-    clipboard: {
-      // toggle to add extra line breaks when pasting HTML:
-      matchVisual: false
-    },
-    // imageResize: {
-    //   parchment: Quill.import('parchment'),
-    //   modules: ['Resize', 'DisplaySize']
-    // }
-  }
-  const formats = [
-    'header',
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'list',
-    'bullet',
-    'indent',
-    'link',
-    'image',
-    'video'
-  ];
-
   return (
     <>
       <div
@@ -285,9 +245,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
 
                   <div className="col-sm-12 mb-3">
                     <label>Description</label>
-                    <ReactQuill
-                      formats={formats}
-                      modules={modules}
+                    <ReactQuill                 
                       value={content}
                       onChange={handleEditorChange}
                     />

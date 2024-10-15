@@ -10,11 +10,11 @@ export default function DeleteTask(props) {
       if (section.sectionId === sectionId) {
         console.log(section.tasks.length)
         //count tasks length and if it is 1 
-        if(section.tasks.length===1){
+        // if(section.tasks.length===1){
 
 
-        }
-       // section.tasks = section.tasks.filter((t) => t.taskId !== task?.taskId); 
+        // }
+       section.tasks = section.tasks.filter((t) => t.taskId !== task?.taskId); 
     //    if(i==="yes"){
 
     //    }

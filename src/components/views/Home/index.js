@@ -19,7 +19,10 @@ export default function Home() {
   const [newSection, setNewSection] = useState(sectionLocalStorage);
   const [newSectionError, setNewSectionError] = useState({});
   //begin::Create New Section Code End
-  const [deleted, setDeleted] = useState (false);
+  const [deleted, setDeleted] = useState(false);
+
+  const [draggableCard, setDraggableCard] = useState(null);
+  const [dropShadow, setDropShadow] = useState(false);
 
   const [formState, setFormState] = useState({
     sectionTitle: "",
@@ -56,6 +59,11 @@ export default function Home() {
     setNewSection(data);
   };
 
+
+  //Drag
+  const onDrop = (task , position  ) => {
+    console.log(`${draggableCard} is set to place ${task} and at postion ${position}`)
+  }
   return (
     <div className="taskcreate p-4">
       <ul className="sections ul">
@@ -131,7 +139,7 @@ export default function Home() {
 
         {newSection &&
           newSection?.map((data, index) => {
-            if(data){
+            if (data) {
               const { sectionId, tasks, taskId } = data;
 
               return (
@@ -147,9 +155,15 @@ export default function Home() {
                     </button>
 
                     {/* Display Task in Card View */}
-                    <div className="task-list mt-3">
+                    <div
+                      className="task-list mt-3"
+                      draggable
+                      onDragStart={() => setDraggableCard(index)}
+                      onDragEnd={() => setDraggableCard(null)}
+                    >
                       {tasks?.length > 0 ? (
                         tasks.map((task, index, taskId) => {
+
                           const toggleReadMore = (taskId) => {
                             if (currentTaskID === taskId) {
                               setIsExtand(!isExtand);
@@ -177,17 +191,18 @@ export default function Home() {
                                 }`}
                                 key={index}
                               >
-                                {task?.taskId} 
-                                  <RiDeleteBin6Line  className="bg-danger cursor-pointer d-block mb-2 ml-auto rounded text-white delete-icon"
-                                   data-toggle="modal"
-                                   data-target={`#deletemodal${task?.taskId}`}
-                                   />
-                                  <DeleteTask 
-                                    data={sectionLocalStorage}
-                                    task={task}
-                                    sectionId={sectionId}
-                                    onFilteredData={handleFilteredData}
-                                  />
+                                {task?.taskId}
+                                <RiDeleteBin6Line
+                                  className="bg-danger cursor-pointer d-block mb-2 ml-auto rounded text-white delete-icon"
+                                  data-toggle="modal"
+                                  data-target={`#deletemodal${task?.taskId}`}
+                                />
+                                <DeleteTask
+                                  data={sectionLocalStorage}
+                                  task={task}
+                                  sectionId={sectionId}
+                                  onFilteredData={handleFilteredData}
+                                />
                                 <div className="risk mb-3 d-flex justify-content-between">
                                   <span
                                     className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
@@ -222,24 +237,38 @@ export default function Home() {
                                     )}
                                   </div>
                                 </div>
-                          
-                                  <div className="d-flex justify-content-between">
-                                    <EyeFilled
-                                      className="cursor-pointer"
-                                      data-toggle="modal"
-                                      data-target={`#fullCardDetails${task?.taskId}`}
-                                    />
-                                    <p className="m-0">
-                                      Task End Date :{" "}
-                                      {task?.taskDate
-                                        ? moment(task.taskDate).format(
-                                            "MM-DD-YYYY"
-                                          )
-                                        : "N/A"}
-                                    </p>
-                                  </div>
-                              
+
+                                <div className="d-flex justify-content-between">
+                                  <EyeFilled
+                                    className="cursor-pointer"
+                                    data-toggle="modal"
+                                    data-target={`#fullCardDetails${task?.taskId}`}
+                                  />
+                                  <p className="m-0">
+                                    Task End Date :{" "}
+                                    {task?.taskDate
+                                      ? moment(task.taskDate).format(
+                                          "MM-DD-YYYY"
+                                        )
+                                      : "N/A"}
+                                  </p>
+                                </div>
                               </div>
+
+                              <div
+                                className={
+                                  dropShadow ? "drop_area" : "hide_drop"
+                                }
+                                onDragEnter={() => setDropShadow(true)}
+                                onDragLeave={() => setDropShadow(false)}
+                                onDrop
+                                set
+                              >
+                                Drop Here
+                              </div>
+
+
+
 
                               {/* Edit card view Start*/}
                               <EditModal
