@@ -12,7 +12,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
     taskTitle: "",
     taskDesc: "",
     taskDate: "",
-    taskPriority: "",
+    taskPriority: "Low",
     taskMedia: [],
   });
 
@@ -40,7 +40,6 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
             taskFormState?.taskTitle &&
             taskFormState?.taskDesc &&
             taskFormState?.taskDate &&
-            taskFormState?.taskPriority &&
             taskFormState?.taskMedia.length > 0
           ) {
             //console.log("Task Media:", taskFormState?.taskMedia);
