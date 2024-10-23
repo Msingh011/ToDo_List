@@ -14,17 +14,22 @@ import DeleteTask from "../DeleteTask";
 
 export default function Home() {
   //Create New Section Code Start
-  const sectionLocalStorage =
-    JSON.parse(localStorage.getItem("sections")) || [];
+  const savedSections = JSON.parse(localStorage.getItem("sections")) || [];
 
-  const [newSection, setNewSection] = useState(sectionLocalStorage);
+  const [newSection, setNewSection] = useState(savedSections);
   const [newSectionError, setNewSectionError] = useState({});
+
+  const [targetSection, setTargetSection] = useState({
+    sectionId: "",
+    taskId: "",
+  });
+
   //begin::Create New Section Code End
   const [deleted, setDeleted] = useState(false);
 
   const [activeCard, setActiveCard] = useState(null);
   const [showDrop, setShowDrop] = useState(false);
-  
+
   const [formState, setFormState] = useState({
     sectionTitle: "",
   });
@@ -60,63 +65,69 @@ export default function Home() {
     setNewSection(data);
   };
 
-
   //Drag
-  const onDrop = (sectionId,position) => {
+  const dragEnded = (sectionId, position) => {
+    console.log("savedSections:", savedSections);
+    console.log("position:", position);
+    let sourceSectionIndex,
+      sourceTaskIndex,
+      targetSectionIndex,
+      targetTaskIndex;
 
-    if(activeCard == null || activeCard === undefined) return;
-  
-    const getTasks = sectionLocalStorage.find((section)=>  section.sectionId === sectionId);
-    console.log("activeCard",activeCard?.sectionId,', sectionId:',sectionId)
+    //Source
+    sourceSectionIndex = savedSections.findIndex(
+      (sections) => sections.sectionId === sectionId
+    );
+    if (sourceSectionIndex < 0) return;
 
-    const sourceTasks = activeCard && activeCard?.task;
+    console.log(
+      "sourceSectionIndex:",
+      sourceSectionIndex,
+      savedSections[sourceSectionIndex].tasks
+    );
 
-    console.log("getTasks",getTasks?.tasks);
-    const tasks = getTasks?.tasks;
+    sourceTaskIndex = savedSections[sourceSectionIndex].tasks.findIndex(
+      (task) => task.taskId === position
+    );
+    if (sourceTaskIndex < 0) return;
 
-    const updateTask = sectionLocalStorage.map((section) => {
-      if(section.sectionId === activeCard.sectionId) {
-        const commonTask = section.tasks.filter(sectask => sectask.taskId === activeCard?.task);
-        
-        
-        const otherTasks= section.tasks.filter(
-          (t) => t.taskId !== activeCard?.task
-        );
-        console.log("commonTask:",commonTask,", otherTasks:",otherTasks);
-        console.log("object", sectionLocalStorage, section.tasks,',tasks:',tasks?.taskId);
-      }
-      return section;
-      
-    }) 
-    localStorage.setItem("sections", JSON.stringify(updateTask));
-    // if (onFilteredData) {
-    //   onFilteredData(updateTask);
-    // }
-    console.log("updateTask",updateTask)
+    console.log("sourceTaskIndex:", sourceTaskIndex);
 
+    //Target
+    targetSectionIndex = savedSections.findIndex(
+      (sections) => sections.sectionId === targetSection.sectionId
+    );
+    console.log("targetSectionIndex:", targetSectionIndex);
 
+    if (targetSectionIndex < 0) return;
 
-    // if(tasks){
-    //   const taskToMove = tasks[activeCard];
+    targetTaskIndex = savedSections[targetSectionIndex].tasks.findIndex(
+      (task) => task.taskId === targetSection.taskId
+    );
+    console.log("targetTaskIndex:", targetTaskIndex);
 
-    //   const updateTask = tasks.filter((tasks, index) => index !== activeCard)  
+    if (targetTaskIndex < 0) return;
 
-    //   updateTask.splice(position, 0, {
-    //         ...taskToMove,
-    //         sectionId : sectionId
-    //       })
+    const tempSections = [...savedSections];
+    const sourceTask = tempSections[sourceSectionIndex].tasks[sourceTaskIndex];
+    console.log("sourceTask:", sourceTask);
+      //tempSections[sourceSectionIndex].cards.splice(sourceTaskIndex, 1);
+    //tempSections[targetSectionIndex].cards.splice(targetTaskIndex,0,sourceTask);
+    //setNewSection(tempSections);
 
-    //       setNewSection(updateTask);
-    // }
-    
-  //   console.log("tasks",tasks)
+    setTargetSection({
+      sectionId: "",
+      taskId: "",
+    });
+  };
+  const dragEntered = (sectionId, taskId) => {
+    if (targetSection.taskId === taskId) return;
+    setTargetSection({
+      sectionId,
+      taskId
+    });
+  };
 
-  //   
-  //   setNewSection(updateTask);
-
-  //   console.log("updateTask",updateTask)
-  // 
-}
   const onDragOver = (e) => {
     e.preventDefault(); // Allow dropping by preventing default behavior
   };
@@ -211,12 +222,9 @@ export default function Home() {
                     </button>
 
                     {/* Display Task in Card View */}
-                    <div
-                      className="task-list mt-3"
-                    >
+                    <div className="task-list mt-3">
                       {tasks?.length > 0 ? (
                         tasks.map((task, index, taskId) => {
-
                           const toggleReadMore = (taskId) => {
                             if (currentTaskID === taskId) {
                               setIsExtand(!isExtand);
@@ -243,10 +251,13 @@ export default function Home() {
                                     : ""
                                 }`}
                                 key={index}
-
                                 draggable
-                                onDragStart={() => setActiveCard({sectionId,task:task?.taskId})}
-                                onDragEnd={() => setActiveCard(null)}                        
+                                // onDragStart={() =>
+                                //   setActiveCard({
+                                //     sectionId,
+                                //     task: task?.taskId,
+                                //   })
+                                // }
                               >
                                 {task?.taskId}
                                 <RiDeleteBin6Line
@@ -255,7 +266,7 @@ export default function Home() {
                                   data-target={`#deletemodal${task?.taskId}`}
                                 />
                                 <DeleteTask
-                                  data={sectionLocalStorage}
+                                  data={savedSections}
                                   task={task}
                                   sectionId={sectionId}
                                   onFilteredData={handleFilteredData}
@@ -311,20 +322,14 @@ export default function Home() {
                                   </p>
                                 </div>
                               </div>
-                           
+
                               <div
-                                className={
-                                  showDrop ? "drop_area" : "hide_drop"
-                                }
-                                onDragEnter={() => setShowDrop(true)}
-                                onDragLeave={() => setShowDrop(false)}
-                                onDrop={(e) => onDrop(sectionId, index + 1 )}
-                                onDragOver={onDragOver} 
+                                className={showDrop ? "drop_area" : "hide_drop"}
+                                 onDragEnter={() => dragEnded(sectionId, task?.taskId)}
+                                 onDragLeave={() => dragEntered(sectionId, task?.taskId)}
                               >
                                 Drop Here
                               </div>
-
-                           
 
                               {/* Edit card view Start*/}
                               <EditModal
@@ -333,7 +338,6 @@ export default function Home() {
                                 onFilteredData={handleFilteredData}
                               />
                               {/* Edit card view End*/}
-                           
                             </>
                           );
                         })
@@ -349,12 +353,10 @@ export default function Home() {
                     onFilteredData={handleFilteredData}
                   />
                   {/** Add Task Modal**/}
-                
                 </>
               );
             }
           })}
-
 
         <li className="card-list">
           <h5>Create Section</h5>

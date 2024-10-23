@@ -66,9 +66,8 @@ export default function Home() {
   };
 
   //Drag
-  const dragEnded = (sectionId, position) => {
-    console.log("savedSections:", savedSections);
-    console.log("position:", position);
+  const onDragEnter = (sectionId, position) => {
+    console.log("sectionId",sectionId , "position", position);
     let sourceSectionIndex,
       sourceTaskIndex,
       targetSectionIndex,
@@ -81,9 +80,9 @@ export default function Home() {
     if (sourceSectionIndex < 0) return;
 
     console.log(
-      "sourceSectionIndex:",
+      "sourceSection:",sectionId,
+      ",sourceSectionIndex:",
       sourceSectionIndex,
-      savedSections[sourceSectionIndex].tasks
     );
 
     sourceTaskIndex = savedSections[sourceSectionIndex].tasks.findIndex(
@@ -91,7 +90,7 @@ export default function Home() {
     );
     if (sourceTaskIndex < 0) return;
 
-    console.log("sourceTaskIndex:", sourceTaskIndex);
+    console.log("sourceTaskIndex:", sourceTaskIndex, "taskId:", position);
 
     //Target
     targetSectionIndex = savedSections.findIndex(
@@ -120,11 +119,9 @@ export default function Home() {
       taskId: "",
     });
   };
-  const dragEntered = (sectionId, taskId) => {
+  const dragEnd = (sectionId, taskId) => {
     if (targetSection.taskId === taskId) return;
     setTargetSection({
-
-
       sectionId,
       taskId
     });
@@ -254,15 +251,14 @@ export default function Home() {
                                 }`}
                                 key={index}
                                 draggable
-                                onDragStart={() =>
-                                  setActiveCard({
-                                    sectionId,
-                                    task: task?.taskId,
-                                  })
-                                }
-                                onDragEnd={() => setActiveCard(null)}
+                                // onDragStart={() =>
+                                //   setActiveCard({
+                                //     sectionId,
+                                //     task: task?.taskId,
+                                //   })
+                                // }
                               >
-                                {task?.taskId}
+                                {task?.taskId}  
                                 <RiDeleteBin6Line
                                   className="bg-danger cursor-pointer d-block mb-2 ml-auto rounded text-white delete-icon"
                                   data-toggle="modal"
@@ -328,14 +324,21 @@ export default function Home() {
 
                               <div
                                 className={showDrop ? "drop_area" : "hide_drop"}
-                                 onDragEnter={() => dragEnded(sectionId, task?.taskId)}
-                                 onDragLeave={() => dragEntered(sectionId, task?.taskId)}
-
-                               
+                                 onDragEnter={() => onDragEnter(sectionId, task?.taskId)}
+                                 onDragEnd={() => dragEnd(sectionId, task?.taskId)}
                               >
-                                Drop Here
+                                Drop Here (sectionId - {sectionId}, taskId - {task?.taskId})
                               </div>
-
+                              <br/>
+                              
+                              <div
+                                className={showDrop ? "drop_area" : "hide_drop"}
+                                onDragEnd={() => onDragEnter(sectionId, task?.taskId)}
+                                onDragEnter={() => dragEnd(sectionId, task?.taskId)}
+                              >
+                                Drop Here1 (sectionId - {sectionId}, taskId - {task?.taskId})
+                              </div>
+                              <br/>
                               {/* Edit card view Start*/}
                               <EditModal
                                 task={task}
