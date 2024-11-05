@@ -13,6 +13,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
     taskDesc: "",
     taskDate: "",
     taskPriority: "Low",
+    taskStatus: "N/A",
     taskMedia: [],
   });
 
@@ -29,72 +30,72 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
   }
 
   //Handle for Create New Add Task End
-  const handleTask = (e, sectionId) => {
+  const handleTask = async (e, sectionId) => {
     e.preventDefault();
-    setContent("");
+    //setContent("");
     const allSections = [...newSection];
-    allSections &&
-      allSections.map(async (item) => {
-        if (sectionId === item?.sectionId) {
-          if (
-            taskFormState?.taskTitle &&
-            taskFormState?.taskDesc &&
-            taskFormState?.taskDate &&
-            taskFormState?.taskMedia.length > 0
-          ) {
-            //console.log("Task Media:", taskFormState?.taskMedia);
-            console.log("Task taskDesc:", taskFormState?.taskDesc);
-          
-            const newTask = {
-              taskId: Date.now(),
-              taskTitle: taskFormState?.taskTitle,
-              taskDesc: taskFormState?.taskDesc,
-              taskDate: taskFormState?.taskDate,
-              taskPriority: taskFormState?.taskPriority,
-              taskMedia: await Promise.all(
-                Array.from(taskFormState?.taskMedia).map(
-                  async (file) => await fileToBase64(file)
-                )
-              ),
-            };
-            const updateTask = [...(item.tasks || []), newTask];
-            item.tasks = updateTask;
+    const updatedSections = allSections &&
+  await Promise.all(
+    allSections.map(async (item) => {
+      if (sectionId === item?.sectionId) {
+        if (
+          taskFormState?.taskTitle &&
+          taskFormState?.taskDesc &&
+          taskFormState?.taskDate &&
+          taskFormState?.taskMedia.length > 0
+        ) {
+          const newTask = {
+            taskId: Date.now(),
+            taskTitle: taskFormState?.taskTitle,
+            taskDesc: taskFormState?.taskDesc,
+            taskDate: taskFormState?.taskDate,
+            taskPriority: taskFormState?.taskPriority,
+            taskStatus: taskFormState?.taskStatus,
+            taskMedia: await Promise.all(
+              Array.from(taskFormState?.taskMedia).map(file => fileToBase64(file))
+            ),
+          };
 
-            localStorage.setItem("sections", JSON.stringify(allSections));
+          // Update tasks in the section
+          const updateTask = [...(item.tasks || []), newTask];
+          item.tasks = updateTask;
 
-            // Call the callback function to pass filtered data
-            if (onFilteredData) {
-              onFilteredData(allSections);
-            }
-            console.log("all", allSections);
 
-            setTaskError({});
-            setTaskFormState({
-              taskTitle: "",
-              taskDesc: "",
-              taskDate: "",
-              taskPriority: "",
-              taskMedia: [],
-            });
-            if (fileInputRef.current) {
-              fileInputRef.current.value = null;
-            }
-          } else {
-            setTaskError({
-              taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
-              taskDesc: taskFormState?.taskDesc
-                ? ""
-                : "Description is Mandatory",
-              taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
-              taskMedia:
-                taskFormState?.taskMedia.length > 0
-                  ? ""
-                  : "At least one Media is Mandatory",
-            });
+          setTaskError({});
+          setTaskFormState({
+            taskTitle: "",
+            taskDesc: "",
+            taskDate: "",
+            taskPriority: "",
+            taskStatus: "",
+            taskMedia: [],
+          });
+          if (fileInputRef.current) {
+            fileInputRef.current.value = null;
           }
+        } else {
+          // Set task error if validation fails
+          setTaskError({
+            taskTitle: taskFormState?.taskTitle ? "" : "Title is Mandatory",
+            taskDesc: taskFormState?.taskDesc ? "" : "Description is Mandatory",
+            taskDate: taskFormState?.taskDate ? "" : "Date is Mandatory",
+            taskMedia:
+              taskFormState?.taskMedia.length > 0 ? "" : "At least one Media is Mandatory",
+          });
         }
-      });
-  };
+      }
+      return item; // Return each updated section
+    })
+  );
+
+  // Save updated sections to localStorage
+  localStorage.setItem("sections", JSON.stringify(updatedSections));
+  // Call the callback function to pass filtered data
+  if (onFilteredData) {
+    onFilteredData(updatedSections);
+  }
+  
+};
 
   //Editor
 
@@ -140,7 +141,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
               <form>
                 <div className="row">
                   <div className="col-sm-6  mb-3">
-                    <label>Title</label>
+                    <label>Title <span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className={
@@ -188,8 +189,32 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                     </select>
                   </div>
 
+
+
                   <div className="col-sm-6  mb-3">
-                    <label className="d-block ">Task End Date</label>
+                    <label htmlFor="exampleFormControlFile1">
+                      Task Status
+                    </label>
+                    <select
+                      className="form-control"
+                      value={taskFormState?.taskStatus}
+                      onChange={(e) => {
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskStatus: e.target?.value,
+                        });
+                      }}
+                    >
+                      <option value="N/A" selected>N/A</option>
+                      <option>Pending</option>
+                      <option>In-Progress</option>
+                      <option>Done</option>
+                    </select>
+                  </div>
+
+
+                  <div className="col-sm-6  mb-3">
+                    <label className="d-block ">Task End Date <span className="text-danger">*</span></label>
                     <input
                       type="date"
                       className={
@@ -214,7 +239,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   </div>
 
                   <div className="col-sm-6  mb-3">
-                    <label className="d-block">Upload Doc</label>
+                    <label className="d-block">Upload Doc <span className="text-danger">*</span></label>
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -243,7 +268,7 @@ export default function AddTaskModal({ sectionId, onFilteredData }) {
                   </div>
 
                   <div className="col-sm-12 mb-3">
-                    <label>Description</label>
+                    <label>Description <span className="text-danger">*</span></label>
                     <ReactQuill                 
                       value={content}
                       onChange={handleEditorChange}

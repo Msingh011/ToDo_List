@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes,} from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Sidebar from "./components/Sidebar";
 import Home from "./components/views/Home";
@@ -15,10 +15,10 @@ function App() {
             <Sidebar />
           </div>
           <div className="all-content">
-            <TopHeader/>
+            {/* <TopHeader/> */}
             <Routes>
-            <Route path="/" element={<Home />}></Route>
-            <Route path="/home" element={<Home />}></Route>
+              <Route path="/" element={<Home />}></Route>
+              <Route path="/home" element={<Home />}></Route>
               <Route path="/tasklist" element={<TaskList />}></Route>
               <Route path="/notification" element={<Notification />}></Route>
             </Routes>

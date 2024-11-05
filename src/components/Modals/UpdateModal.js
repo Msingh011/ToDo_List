@@ -16,6 +16,7 @@ export default function EditModal(props) {
     taskDesc: task?.taskDesc,
     taskDate: task?.taskDate,
     taskPriority: task?.taskPriority,
+    taskStatus: task?.taskStatus,
     // taskMedia: [],
   });
 
@@ -45,14 +46,11 @@ export default function EditModal(props) {
           item.tasks &&
             item.tasks.map((subItems) => {
               if (subItems.taskId === task.taskId) {
-                subItems.taskTitle =
-                  taskFormState?.taskTitle || subItems.taskTitle;
-                subItems.taskPriority =
-                  taskFormState?.taskPriority || subItems.taskPriority;
-                subItems.taskDate =
-                  taskFormState?.taskDate || subItems.taskDate;
-                subItems.taskDesc =
-                  taskFormState?.taskDesc || subItems.taskDesc;
+                subItems.taskTitle = taskFormState?.taskTitle ||  subItems.taskTitle;
+                subItems.taskPriority = taskFormState?.taskPriority || subItems.taskPriority;
+                subItems.taskStatus = taskFormState?.taskStatus || subItems.taskStatus;
+                subItems.taskDate = taskFormState?.taskDate || subItems.taskDate;
+                subItems.taskDesc = taskFormState?.taskDesc || subItems.taskDesc;
               }
             });
         }
@@ -142,6 +140,29 @@ export default function EditModal(props) {
                       <option>High</option>
                     </select>
                   </div>
+
+
+                  <div className="col-sm-6  mb-3">
+                    <label htmlFor="exampleFormControlFile1">
+                      Task Status
+                    </label>
+                    <select
+                      className="form-control"
+                      value={taskFormState.taskStatus}
+                      onChange={(e) => {
+                        setTaskFormState({
+                          ...taskFormState,
+                          taskStatus: e.target?.value,
+                        });
+                      }}
+                    >
+                      <option value="N/A">N/A</option>
+                      <option>Pending</option>
+                      <option>Progress</option>
+                      <option>Done</option>
+                    </select>
+                  </div>
+
 
                   <div className="col-sm-6  mb-3">
                     <label className="d-block ">Task End Date</label>

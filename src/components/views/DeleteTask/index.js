@@ -75,12 +75,9 @@ export default function DeleteTask(props) {
             <div className="ant-modal-content">
               <div className="ant-modal-body">
                 <div className="ant-modal-confirm-body-wrapper">
-                  <div className="align-items-center ant-modal-confirm-body d-flex">
-                    <div className="alert-icon pr-5">
-                      <i className="flaticon-warning icon-3x text-warning"></i>
-                    </div>
+                  <div className="align-items-center ant-modal-confirm-body">
                     <span className="ant-modal-confirm-title">
-                      Are you sure you want to delete this Task{" "}
+                      Are you sure you want to delete this Task
                       <strong> {task?.taskTitle} </strong>?
                     </span>
                   </div>

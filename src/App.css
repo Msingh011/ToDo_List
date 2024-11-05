@@ -64,22 +64,30 @@ html {
 .todo svg {
   font-size: 20px;
 }
-.risk span {
-  background-color: red;
+.priority-button {
   padding: 2px 13px;
-  color: #fff;
   font-weight: 600;
   border-radius: 50px;
   font-size: 12px;
   letter-spacing: 0.5px;
+  display: inline-block;
 }
-.risk .med-btn{
-  background-color: #ffd146;
+.priority-button.low-btn, .priority-button.low-priority, .priority-button.progress-status{
+  background-color: #ffb853;
   color: #000000;
 }
-.risk .low-btn{
-  background-color: #46fc35;
+
+.priority-button.med-btn,.priority-button.med-priority{
+  background-color: #ebeb19;
   color: #000000;
+}
+.priority-button.high-btn, .priority-button.high-priority, .priority-button.pending-status{
+  background-color: #ff0000;
+  color: #ffffff;
+}
+ .priority-button.done-status{
+  background-color: #149714;
+  color: #ffffff;
 }
 .addbutton {
   border: 1px solid #ccc;
@@ -166,4 +174,33 @@ html {
   -o-transition: all 0.5s;
   opacity: 1;
   border: 1px solid #000;
+}
+
+.deletediv{  position: relative;}
+.deletediv p {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #fff;
+  border-radius: 3px;
+  z-index: 5;
+  box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.12);
+  padding: 10px;
+  width: 150px !important;
+  cursor: pointer;
+  text-transform: capitalize;
+  font-weight: 500;
+  margin: 0;
+}
+
+.ant-modal-content {
+  padding: 2rem;
+  text-align: center;
+}
+.ant-modal-confirm-btns button {
+  border: 1px solid #797979;
+  margin: 10px;
+  padding: 2px 30px;
+  background: #787878;
+  color: #fff;
 }

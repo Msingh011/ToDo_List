@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { RxLapTimer } from "react-icons/rx";
 import { FiPlusCircle } from "react-icons/fi";
-import { message } from "antd";
 import moment from "moment";
 import EditModal from "../../Modals/UpdateModal";
 import AddTaskModal from "../../Modals/AddTaskModal";
@@ -11,27 +10,38 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { EyeFilled } from "@ant-design/icons";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import DeleteTask from "../DeleteTask";
+import { useDrag, useDrop } from "react-dnd";
+import { TfiMoreAlt } from "react-icons/tfi";
+import DeletSection from "../SectionDelete";
 
 export default function Home() {
   //Create New Section Code Start
   const savedSections = JSON.parse(localStorage.getItem("sections")) || [];
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [newSection, setNewSection] = useState(savedSections);
   const [newSectionError, setNewSectionError] = useState({});
-
   const [targetSection, setTargetSection] = useState({
     sectionId: "",
     taskId: "",
   });
 
   //begin::Create New Section Code End
-  const [deleted, setDeleted] = useState(false);
+  const [openDeletedId, setOpenDeleteId] = useState(null);
 
-  const [activeCard, setActiveCard] = useState(null);
   const [showDrop, setShowDrop] = useState(false);
-
   const [formState, setFormState] = useState({
     sectionTitle: "",
+  });
+
+  const toggleDeleteDropdown = (id) => {
+    setOpenDeleteId(openDeletedId === id ? null : id);
+  };
+  //Search
+  const filteredSections = newSection.map((section) => {
+    const filteredTasks = section.tasks.filter((task) =>
+      task.taskTitle.toLowerCase().includes(searchQuery.toLocaleLowerCase())
+    );
+    return { ...section, tasks: filteredTasks };
   });
 
   const sectionHandle = (e) => {
@@ -63,11 +73,13 @@ export default function Home() {
   // Callback to get filtered data from AddTaskModal
   const handleFilteredData = (data) => {
     setNewSection(data);
+    console.log("data",data)
   };
 
+
   //Drag
-  const onDragEnter = (sectionId, position) => {
-    console.log("sectionId",sectionId , "position", position);
+  const dragEnded = (sectionId, position) => {
+    console.log("sectionId", sectionId, "position", position);
     let sourceSectionIndex,
       sourceTaskIndex,
       targetSectionIndex,
@@ -80,9 +92,10 @@ export default function Home() {
     if (sourceSectionIndex < 0) return;
 
     console.log(
-      "sourceSection:",sectionId,
+      "sourceSection:",
+      sectionId,
       ",sourceSectionIndex:",
-      sourceSectionIndex,
+      sourceSectionIndex
     );
 
     sourceTaskIndex = savedSections[sourceSectionIndex].tasks.findIndex(
@@ -110,7 +123,8 @@ export default function Home() {
     const tempSections = [...savedSections];
     const sourceTask = tempSections[sourceSectionIndex].tasks[sourceTaskIndex];
     console.log("sourceTask:", sourceTask);
-      //tempSections[sourceSectionIndex].cards.splice(sourceTaskIndex, 1);
+
+    //tempSections[sourceSectionIndex].cards.splice(sourceTaskIndex, 1);
     //tempSections[targetSectionIndex].cards.splice(targetTaskIndex,0,sourceTask);
     //setNewSection(tempSections);
 
@@ -118,21 +132,31 @@ export default function Home() {
       sectionId: "",
       taskId: "",
     });
+
+    setShowDrop(false);
   };
-  const dragEnd = (sectionId, taskId) => {
+  const dragEntered = (sectionId, taskId) => {
     if (targetSection.taskId === taskId) return;
     setTargetSection({
       sectionId,
-      taskId
+      taskId,
     });
+    setShowDrop(true);
   };
 
   const onDragOver = (e) => {
-    e.preventDefault(); // Allow dropping by preventing default behavior
+    e.preventDefault(); // Necessary for dropping to be allowed
   };
 
   return (
     <div className="taskcreate p-4">
+      <input
+        type="text"
+        placeholder="Search by card title..."
+        className="form-control w-25 ml-auto mb-4"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
       <ul className="sections ul">
         <div
           className="modal fade"
@@ -203,15 +227,40 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {newSection &&
-          newSection?.map((data, index) => {
+        {filteredSections &&
+          filteredSections?.map((data, index) => {
             if (data) {
               const { sectionId, tasks, taskId } = data;
+              console.log("data?.sectionId", data?.sectionId);
               return (
                 <>
                   <li className="card-list" key={index}>
-                    <h5>{data?.sectionTitle}</h5>
+                    <div className="d-flex align-items-center justify-content-between">
+                      <h5 className="m-0">{data?.sectionTitle}</h5>
+                      <div>
+                        <TfiMoreAlt
+                          onClick={() => toggleDeleteDropdown(sectionId)}
+                        />
+
+                        <DeletSection
+                          data={savedSections}
+                          sectionId={sectionId}
+                          tasks={tasks}
+                          onFilteredData={handleFilteredData}
+                        />
+
+                        {openDeletedId === sectionId && (
+                          <div className="deletediv">
+                            <p
+                              data-toggle="modal"
+                              data-target={`#sectiondeletemodal${data?.sectionId}`}
+                            >
+                              delete Section
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <button
                       className="addbutton"
                       data-toggle="modal"
@@ -230,7 +279,7 @@ export default function Home() {
                             }
                             setCurrentTaskID(taskId);
                           };
-                          const contentLimit = 50;
+                          const contentLimit = 100;
                           const taskDesc = task?.taskDesc || "";
                           const readMore = taskDesc.length > contentLimit;
 
@@ -251,14 +300,15 @@ export default function Home() {
                                 }`}
                                 key={index}
                                 draggable
-                                // onDragStart={() =>
-                                //   setActiveCard({
-                                //     sectionId,
-                                //     task: task?.taskId,
-                                //   })
-                                // }
+                                dragEnded={() =>
+                                  dragEnded(sectionId, task?.taskId)
+                                }
+                                dragEntered={() =>
+                                  dragEntered(sectionId, task?.taskId)
+                                }
+                                onDragOver={onDragOver}
                               >
-                                {task?.taskId}  
+                              
                                 <RiDeleteBin6Line
                                   className="bg-danger cursor-pointer d-block mb-2 ml-auto rounded text-white delete-icon"
                                   data-toggle="modal"
@@ -270,9 +320,9 @@ export default function Home() {
                                   sectionId={sectionId}
                                   onFilteredData={handleFilteredData}
                                 />
-                                <div className="risk mb-3 d-flex justify-content-between">
+                                <div className="mb-3 d-flex justify-content-between">
                                   <span
-                                    className={`bu ${task?.taskPriority?.toLowerCase()}-btn`}
+                                    className={`priority-button ${task?.taskPriority?.toLowerCase()}-btn`}
                                   >
                                     {task?.taskPriority}
                                   </span>
@@ -280,7 +330,6 @@ export default function Home() {
                                 </div>
                                 <div className="todocards">
                                   <p className="m-0">{task?.taskTitle}</p>
-
                                   <div className="border-bottom border-top my-3 py-2">
                                     <div
                                       className="text-capitalize"
@@ -321,24 +370,19 @@ export default function Home() {
                                   </p>
                                 </div>
                               </div>
+                              {/* (
+                              {showDrop && (
+                                <div
+                                  className={
+                                    showDrop ? "drop_area" : "hide_drop"
+                                  }
+                                >
+                                  Drop Here (sectionId - {sectionId}, taskId -{" "}
+                                  {task?.taskId})
+                                </div>
+                              )}
+                              ) */}
 
-                              <div
-                                className={showDrop ? "drop_area" : "hide_drop"}
-                                 onDragEnter={() => onDragEnter(sectionId, task?.taskId)}
-                                 onDragEnd={() => dragEnd(sectionId, task?.taskId)}
-                              >
-                                Drop Here (sectionId - {sectionId}, taskId - {task?.taskId})
-                              </div>
-                              <br/>
-                              
-                              <div
-                                className={showDrop ? "drop_area" : "hide_drop"}
-                                onDragEnd={() => onDragEnter(sectionId, task?.taskId)}
-                                onDragEnter={() => dragEnd(sectionId, task?.taskId)}
-                              >
-                                Drop Here1 (sectionId - {sectionId}, taskId - {task?.taskId})
-                              </div>
-                              <br/>
                               {/* Edit card view Start*/}
                               <EditModal
                                 task={task}
